@@ -1,0 +1,52 @@
+body {
+  margin: 0;
+  font-family: "Roboto", sans-serif;
+}
+
+#history {
+  width: 100%;
+}
+#history td, #history th {
+  width: 33.3%;
+}
+#history th {
+  padding: 12px;
+}
+
+#appbar {
+  color: white;
+  height: 60px;
+  background-color: #3d70b2;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  position: relative;
+  justify-content: center;
+}
+#appbar .connect {
+  cursor: pointer;
+  position: absolute;
+  left: 0;
+}
+
+#scramble {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+#timer {
+  font-size: 64px;
+  margin-bottom: 12px;
+}
+
+#avg {
+  margin-bottom: 52px;
+}
+
+.md-48 {
+  font-size: 48px;
+}
+
+/*# sourceMappingURL=style.css.map */
