@@ -175,6 +175,15 @@ class Giiker extends EventEmitter {
         this._device = null;
         this.emit('disconnected');
     }
+    /**
+     * Resets the cube's internal state to solved.
+     */
+    async resetState () {
+        const writeCharacteristic = await this._systemService.getCharacteristic(SYSTEM_WRITE_UUID);
+        const data = new Uint8Array([0xa1]).buffer;
+        this._resetting = true;
+        await writeCharacteristic.writeValue(data);
+    }
 
     /**
      * Returns a promise that will resolve to the battery level

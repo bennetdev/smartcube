@@ -37,6 +37,11 @@ body {
   position: absolute;
   left: 0;
 }
+#appbar .reset {
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+}
 
 #scramble {
   font-weight: bold;
@@ -81,7 +86,7 @@ body {
   width: 20%;
 }
 
-.close_modal {
+.close_modal, .delete_solve {
   float: right;
   font-size: 20px;
   cursor: pointer;

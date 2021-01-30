@@ -47,6 +47,15 @@ class Cube {
         return null
     }
 
+    delete_solve_by_id(id){
+        for (var i = 0; i < this.solves.length; i++) {
+            if (this.solves[i].id === id) {
+                this.solves.splice(i,1);
+                break;
+            }
+        }
+    }
+
     generate_scramble() {
         this.scramble_index = 0;
         var scramble = [];
@@ -81,7 +90,7 @@ class Cube {
     }
 
     get_average_on_limit(limit) {
-        var abbruch = this.solves.length - (limit + 1);
+        var abbruch = this.solves.length - limit;
         if (this.solves.length - limit <= 0) {
             abbruch = 0;
         }
@@ -140,12 +149,20 @@ function get_today(){
     return today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate();
 }
 
-
+function refresh_solves(cube) {
+    $("#history").html("<tr><th>Date</th><th>Time</th><th>Scramble</th></tr>");
+    for (var i = 0; i < cube.solves.length; i++) {
+        render_solve(cube.solves[i]);
+    }
+}
+function render_solve(solve){
+    var row = "<tr class='solve' id='" + solve.id + "'><td>" + solve.date + "</td><td>" + round_to_3(solve.time) + "</td><td>" + solve.scramble.join(" ") + "</td></tr>"
+    $("#history").append(row);
+}
 function add_solve(solve, cube) {
     solve.time = stopwatch.time();
     cube.solves.push(solve);
-    var row = "<tr class='solve' id='" + solve.id + "'><td>" + solve.date + "</td><td>" + round_to_3(solve.time) + "</td><td>" + solve.scramble.join(" ") + "</td></tr>"
-    $("#history").append(row);
+    render_solve(solve);
 }
 
 function render_scramble(cube){
@@ -166,9 +183,12 @@ function update_avg(cube){
 function round_to_3(number){
     return Math.round(number) / 1000
 }
+function close_modal(){
+    $("#solve_modal").css("display", "none");
+}
 
 const stopwatch = new Stopwatch();
-
+var current_solve_id = -1;
 
 function on_move(cube, move){
     console.log(stopwatch.get_running());
@@ -217,9 +237,13 @@ $(".connect").click(async () => {
     window.giiker = giiker;
     window.cube = cube;
 });
+$(".reset").click(function (){
+    cube.giiker.resetState();
+})
 $("#history").on("click", ".solve",function (){
     $("#solve_modal").css("display", "block");
     var id = parseInt($(this).attr("id"));
+    current_solve_id = id;
     console.log(id);
     var solve = cube.get_solve_by_id(id);
     console.log(cube, solve, cube.solves)
@@ -229,6 +253,13 @@ $("#history").on("click", ".solve",function (){
     $("#solve_moves").html(solve.moves.join(" "));
     $("#solve_scramble").html(solve.scramble.join(" "));
 });
+$(".delete_solve").click(function (){
+    var id = current_solve_id;
+    cube.delete_solve_by_id(id);
+    refresh_solves(cube);
+    update_avg(cube);
+    close_modal();
+});
 $(".close_modal").click(function (){
-   $("#solve_modal").css("display", "none");
+    close_modal()
 });
