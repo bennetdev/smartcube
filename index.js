@@ -1,57 +1,93 @@
 import {connect} from '../smartcube/js/libs/index.js';
 
-class Cube{
+class Solve{
+    constructor(date, id) {
+        this.id = id;
+        this.moves = [];
+        this.scramble = [];
+        this.time = 0;
+        this.date = date;
+    }
+    to_json(){
+        return {
+            date: get_today(),
+            time: stopwatch.time() / 1000,
+            scramble: this.scramble.join(" "),
+            moves: this.moves
+        };
+    }
+    get move_number(){
+        return this.moves.length;
+    }
+}
+
+class Cube {
     static moves = ["U", "F", "L", "R", "D", "B"];
     static scramble_len = 21;
+
     constructor(giiker) {
         this.giiker = giiker;
         this.solves = [];
         this.scramble = [];
-        this.scramble_backup = [];
+        this.current_solve = new Solve(get_today(), 0);
         this.generate_scramble();
+
     }
-    get solved(){
+
+    get solved() {
         return this.giiker.stateString === "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB";
     }
-    generate_scramble(){
+
+    get_solve_by_id(id) {
+        for (var i = 0; i < this.solves.length; i++) {
+            if (this.solves[i].id === id) {
+                return this.solves[i];
+            }
+        }
+        return null
+    }
+
+    generate_scramble() {
         this.scramble_index = 0;
         var scramble = [];
         var scramble_backup = [];
         var last_move = "";
-        for (var i = 0; i < Cube.scramble_len; i++){
+        for (var i = 0; i < Cube.scramble_len; i++) {
             do {
                 var move = Cube.moves[Math.floor(Math.random() * Cube.moves.length)];
-            } while(last_move === move);
+            } while (last_move === move);
             last_move = move;
             var prime_rdm = Math.random();
-            if(prime_rdm < 0.5){
+            if (prime_rdm < 0.5) {
                 move += "'";
             }
-/*            var two_random = Math.random();
-            if(two_random < 0.5){
-                move = "2" + move;
-            }*/
+            /*            var two_random = Math.random();
+                        if(two_random < 0.5){
+                            move = "2" + move;
+                        }*/
             scramble.push(move);
             scramble_backup.push(move);
         }
         this.scramble = scramble;
-        this.scramble_backup = scramble_backup;
+        this.current_solve.scramble = scramble_backup;
     }
-    get_average(){
+
+    get_average() {
         var sum = 0;
-        for (var i = 0; i < this.solves.length; i++){
-            sum += this.solves[i].time;
+        for (var i = 0; i < this.solves.length; i++) {
+            sum += this.solves[i].time / 1000;
         }
         return Math.round(sum / this.solves.length * 100) / 100;
     }
-    get_average_on_limit(limit){
-        var abbruch = this.solves.length - (limit+1);
-        if(this.solves.length - limit <= 0){
+
+    get_average_on_limit(limit) {
+        var abbruch = this.solves.length - (limit + 1);
+        if (this.solves.length - limit <= 0) {
             abbruch = 0;
         }
         var sum = 0;
-        for (var i = this.solves.length - 1; i > abbruch; i--){
-            sum += this.solves[i].time;
+        for (var i = this.solves.length - 1; i >= abbruch; i--) {
+            sum += this.solves[i].time / 1000;
         }
         return Math.round(sum / (abbruch === 0 ? this.solves.length : limit) * 100) / 100;
     }
@@ -99,18 +135,16 @@ var Stopwatch = function (){
     this.stop = stop_timer;
     this.time = get_time;
 }
-function generate_current_solve(cube) {
+function get_today(){
     var today = new Date();
-    return {
-        date: today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate(),
-        time: stopwatch.time() / 1000,
-        scramble: cube.scramble_backup.join(" ")
-    };
+    return today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate();
 }
 
+
 function add_solve(solve, cube) {
+    solve.time = stopwatch.time();
     cube.solves.push(solve);
-    var row = "<tr><td>" + solve.date + "</td><td>" + solve.time + "</td><td>" + solve.scramble + "</td></tr>"
+    var row = "<tr class='solve' id='" + solve.id + "'><td>" + solve.date + "</td><td>" + round_to_3(solve.time) + "</td><td>" + solve.scramble.join(" ") + "</td></tr>"
     $("#history").append(row);
 }
 
@@ -128,6 +162,9 @@ function reverse_notation(notation){
 }
 function update_avg(cube){
     $("#avg").html("Avg " + cube.get_average() + " AO3 " + cube.get_average_on_limit(3) + " AO5 " + cube.get_average_on_limit(5));
+}
+function round_to_3(number){
+    return Math.round(number) / 1000
 }
 
 const stopwatch = new Stopwatch();
@@ -157,10 +194,14 @@ function on_move(cube, move){
     }
     else if(cube.solved){
         stopwatch.stop();
-        add_solve(generate_current_solve(cube), cube);
+        add_solve(cube.current_solve, cube);
         update_avg(cube);
+        cube.current_solve = new Solve(get_today(), cube.solves[cube.solves.length - 1].id + 1);
         cube.generate_scramble();
         render_scramble(cube);
+    }
+    else{
+        cube.current_solve.moves.push(move.notation);
     }
 }
 $(".connect").click(async () => {
@@ -175,4 +216,19 @@ $(".connect").click(async () => {
     // Expose giiker object for testing on console
     window.giiker = giiker;
     window.cube = cube;
+});
+$("#history").on("click", ".solve",function (){
+    $("#solve_modal").css("display", "block");
+    var id = parseInt($(this).attr("id"));
+    console.log(id);
+    var solve = cube.get_solve_by_id(id);
+    console.log(cube, solve, cube.solves)
+    $("#solve_time").html(round_to_3(solve.time));
+    $("#solve_moves_number").html(solve.move_number + " moves, " + Math.round(solve.move_number / round_to_3(solve.time) * 100) / 100 + " moves per second");
+    $("#solve_date").html(solve.date);
+    $("#solve_moves").html(solve.moves.join(" "));
+    $("#solve_scramble").html(solve.scramble.join(" "));
+});
+$(".close_modal").click(function (){
+   $("#solve_modal").css("display", "none");
 });

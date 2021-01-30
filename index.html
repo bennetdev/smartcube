@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>GiiKER API Tester</title>
+    <title>SmartCube</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script type="module" src="index.js" defer charset="utf-8"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -14,15 +14,28 @@
         body {
             text-align: center;
         }
+
         button {
             margin: 1em 0;
         }
     </style>
 </head>
 <body>
+<div class="modal" id="solve_modal" style="display: none">
+    <div class="modalContent">
+        <div class="modalHeader">
+            <span class="material-icons md-48 close_modal">close</span>
+        </div>
+        <h1 id="solve_time">00.00</h1>
+        <p id="solve_moves_number">0</p>
+        <p id="solve_moves"></p>
+        <p id="solve_scramble"></p>
+        <p id="solve_date"></p>
+    </div>
+</div>
 <div id="appbar">
-<span class="material-icons md-48 connect">bluetooth</span>
-<p id="scramble"></p>
+    <span class="material-icons md-48 connect">bluetooth</span>
+    <p id="scramble"></p>
 </div>
 <div class="container">
     <p id="timer">00.00</p>
