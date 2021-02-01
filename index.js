@@ -8,14 +8,6 @@ class Solve{
         this.time = 0;
         this.date = date;
     }
-    to_json(){
-        return {
-            date: get_today(),
-            time: stopwatch.time() / 1000,
-            scramble: this.scramble.join(" "),
-            moves: this.moves
-        };
-    }
     get move_number(){
         return this.moves.length;
     }
@@ -53,6 +45,14 @@ class Cube {
                 this.solves.splice(i,1);
                 break;
             }
+        }
+    }
+    get next_id(){
+        if(cube.solves.length === 0){
+            return 0;
+        }
+        else{
+            return cube.solves[cube.solves.length - 1].id + 1;
         }
     }
 
@@ -186,6 +186,37 @@ function round_to_3(number){
 function close_modal(){
     $("#solve_modal").css("display", "none");
 }
+async function get_json_by_file(file){
+    var formdata = new FormData();
+    formdata.append("file", file)
+    const result = await fetch("rsc/partials/readJson.php", {
+        method: "POST", body: formdata
+    });
+    return result.json();
+}
+function load_json(json){
+    var solves = JSON.parse(json);
+    for (var i = 0; i < solves.length; i++){
+        var solve = new Solve(solves[i].date, cube.next_id);
+        solve.moves = solves[i].moves;
+        solve.time = solves[i].time;
+        solve.scramble = solves[i].scramble;
+        cube.solves.push(solve);
+    }
+    refresh_solves(cube);
+}
+function get_json_solves(){
+    return JSON.stringify(cube.solves);
+}
+function download(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+}
 
 const stopwatch = new Stopwatch();
 var current_solve_id = -1;
@@ -216,7 +247,7 @@ function on_move(cube, move){
         stopwatch.stop();
         add_solve(cube.current_solve, cube);
         update_avg(cube);
-        cube.current_solve = new Solve(get_today(), cube.solves[cube.solves.length - 1].id + 1);
+        cube.current_solve = new Solve(get_today(), cube.next_id);
         cube.generate_scramble();
         render_scramble(cube);
     }
@@ -263,3 +294,9 @@ $(".delete_solve").click(function (){
 $(".close_modal").click(function (){
     close_modal()
 });
+$("#file").change(function () {
+    get_json_by_file($("#file").prop("files")[0]).then((response) => load_json(response));
+})
+$("#download").click(function () {
+    download("solves.json", get_json_solves())
+})

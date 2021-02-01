@@ -92,4 +92,30 @@ body {
   cursor: pointer;
 }
 
+.floating-action-button {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+}
+.floating-action-button div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 5px;
+  border-radius: 50%;
+  height: 64px;
+  width: 64px;
+  cursor: pointer;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+#file {
+  display: none;
+}
+
+#upload {
+  cursor: pointer;
+}
+
 /*# sourceMappingURL=style.css.map */
