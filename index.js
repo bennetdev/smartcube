@@ -11,6 +11,9 @@ class Solve{
     get move_number(){
         return this.moves.length;
     }
+    get moves_per_second(){
+        return Math.round(this.move_number / round_to_3(this.time) * 100) / 100
+    }
 }
 
 class Cube {
@@ -54,6 +57,11 @@ class Cube {
         else{
             return cube.solves[cube.solves.length - 1].id + 1;
         }
+    }
+    set_scramble(new_scramble){
+        this.scramble_index = 0;
+        this.scramble = [...new_scramble];
+        this.current_solve.scramble = [...new_scramble];
     }
 
     generate_scramble() {
@@ -99,6 +107,28 @@ class Cube {
             sum += this.solves[i].time / 1000;
         }
         return Math.round(sum / (abbruch === 0 ? this.solves.length : limit) * 100) / 100;
+    }
+
+    get_top_mps(){
+        var mps = 0;
+
+        for (var i = 0; i < this.solves.length; i++) {
+            if(mps === 0 || this.solves[i].moves_per_second > mps){
+                mps = this.solves[i].moves_per_second;
+            }
+        }
+        return mps;
+    }
+
+    get_top_solve(){
+        var time = 0;
+
+        for (var i = 0; i < this.solves.length; i++) {
+            if(time === 0 || this.solves[i].time < time){
+                time = this.solves[i].time;
+            }
+        }
+        return Math.round(time / 10) / 100;
     }
 }
 var Stopwatch = function (){
@@ -180,6 +210,9 @@ function reverse_notation(notation){
 function update_avg(cube){
     $("#avg").html("Avg " + cube.get_average() + " AO3 " + cube.get_average_on_limit(3) + " AO5 " + cube.get_average_on_limit(5));
 }
+function update_stats(cube){
+    $("#stats").html("Top: " + cube.get_top_solve() + " MpS: " + cube.get_top_mps());
+}
 function round_to_3(number){
     return Math.round(number) / 1000
 }
@@ -214,6 +247,7 @@ function load_json(json){
     }
     refresh_solves(cube);
     update_avg(cube);
+    update_stats(cube);
 }
 function get_json_solves(){
     return JSON.stringify(cube.solves);
@@ -258,6 +292,7 @@ function on_move(cube, move){
         cube.current_solve.id = cube.next_id;
         add_solve(cube.current_solve, cube);
         update_avg(cube);
+        update_stats(cube);
         cube.current_solve = new Solve(get_today(), cube.next_id);
         cube.generate_scramble();
         render_scramble(cube);
@@ -293,7 +328,7 @@ $("#history").on("click", ".solve",function (){
     var solve = cube.get_solve_by_id(id);
     console.log(cube, solve, cube.solves)
     $("#solve_time").html(round_to_3(solve.time));
-    $("#solve_moves_number").html(solve.move_number + " moves, " + Math.round(solve.move_number / round_to_3(solve.time) * 100) / 100 + " moves per second");
+    $("#solve_moves_number").html(solve.move_number + " moves, " + solve.moves_per_second + " moves per second");
     $("#solve_date").html(solve.date);
     $("#solve_moves").html(solve.moves.join(" "));
     $("#solve_scramble").html(solve.scramble.join(" "));
@@ -303,6 +338,12 @@ $(".delete_solve").click(function (){
     cube.delete_solve_by_id(id);
     refresh_solves(cube);
     update_avg(cube);
+    close_modal();
+});
+$(".copy_scramble").click(function (){
+    var id = current_solve_id;
+    cube.set_scramble(cube.get_solve_by_id(id).scramble);
+    render_scramble(cube);
     close_modal();
 });
 $(".close_modal").click(function (){

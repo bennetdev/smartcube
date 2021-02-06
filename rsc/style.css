@@ -58,10 +58,6 @@ body {
   margin-bottom: 12px;
 }
 
-#avg {
-  margin-bottom: 52px;
-}
-
 .md-48 {
   font-size: 48px;
 }
@@ -91,7 +87,7 @@ body {
   width: 20%;
 }
 
-.close_modal, .delete_solve {
+.close_modal, .delete_solve, .copy_scramble {
   float: right;
   font-size: 20px;
   cursor: pointer;
@@ -126,6 +122,7 @@ body {
 #history_wrapper {
   height: 600px;
   overflow-y: scroll;
+  margin-top: 58px;
 }
 
 /*# sourceMappingURL=style.css.map */

@@ -40,6 +40,7 @@
         <div class="modalHeader">
             <span class="material-icons md-48 close_modal">close</span>
             <span class="material-icons md-48 delete_solve">delete</span>
+            <span class="material-icons md-48 copy_scramble">content_copy</span>
         </div>
         <h1 id="solve_time">00.00</h1>
         <p id="solve_moves_number">0</p>
@@ -56,6 +57,7 @@
 <div class="container">
     <p id="timer">00.00</p>
     <p id="avg">Avg 00.00 AO3 00.00 AO5 00.00</p>
+    <p id="stats">Top: 00.00 MpS: 0</p>
     <div id="history_wrapper">
         <table id="history">
             <tr>
