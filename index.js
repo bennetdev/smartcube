@@ -274,6 +274,7 @@ function on_move(cube, move){
                 stopwatch.reset();
             }
             stopwatch.start();
+            cube.current_solve.moves.push(move.notation);
         }
         else{
             console.log(cube.scramble[cube.scramble_index], move.notation, move.notation === cube.scramble[cube.scramble_index])
