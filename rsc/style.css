@@ -5,12 +5,17 @@ body {
 
 #history {
   width: 100%;
+  text-align: center;
 }
 #history td, #history th {
   width: 33.3%;
 }
 #history th {
   padding: 12px;
+  top: 0;
+  z-index: 1;
+  position: sticky;
+  background-color: white;
 }
 #history td {
   cursor: pointer;
@@ -63,7 +68,7 @@ body {
 
 .modal {
   position: fixed;
-  z-index: 1;
+  z-index: 2;
   left: 0;
   top: 0;
   width: 100%;
@@ -116,6 +121,11 @@ body {
 
 #upload {
   cursor: pointer;
+}
+
+#history_wrapper {
+  height: 600px;
+  overflow-y: scroll;
 }
 
 /*# sourceMappingURL=style.css.map */

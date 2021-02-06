@@ -1,3 +1,17 @@
+<?php
+    session_start();
+    if(isset($_SESSION["solves"])){
+        $autosave = $_SESSION["solves"];
+    }
+    else{
+        $autosave = [];
+    }
+?>
+<script>
+    const autosave = <?php echo $autosave ?>;
+    window.autosave = autosave;
+</script>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,13 +56,15 @@
 <div class="container">
     <p id="timer">00.00</p>
     <p id="avg">Avg 00.00 AO3 00.00 AO5 00.00</p>
-    <table id="history">
-        <tr>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Scramble</th>
-        </tr>
-    </table>
+    <div id="history_wrapper">
+        <table id="history">
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Scramble</th>
+            </tr>
+        </table>
+    </div>
     <div class="floating-action-button">
         <div>
             <span class="material-icons md-3" id="download">download</span>

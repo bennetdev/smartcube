@@ -194,8 +194,17 @@ async function get_json_by_file(file){
     });
     return result.json();
 }
+
+async function save_to_session(cube){
+    var formdata = new FormData();
+    formdata.append("solves", get_json_solves())
+    await fetch("rsc/partials/session.php", {
+        method: "POST", body: formdata
+    });
+}
+
 function load_json(json){
-    var solves = JSON.parse(json);
+    var solves = json;
     for (var i = 0; i < solves.length; i++){
         var solve = new Solve(solves[i].date, cube.next_id);
         solve.moves = solves[i].moves;
@@ -204,6 +213,7 @@ function load_json(json){
         cube.solves.push(solve);
     }
     refresh_solves(cube);
+    update_avg(cube);
 }
 function get_json_solves(){
     return JSON.stringify(cube.solves);
@@ -245,11 +255,13 @@ function on_move(cube, move){
     }
     else if(cube.solved){
         stopwatch.stop();
+        cube.current_solve.id = cube.next_id;
         add_solve(cube.current_solve, cube);
         update_avg(cube);
         cube.current_solve = new Solve(get_today(), cube.next_id);
         cube.generate_scramble();
         render_scramble(cube);
+        save_to_session(cube).then(console.log("saved"));
     }
     else{
         cube.current_solve.moves.push(move.notation);
@@ -260,6 +272,7 @@ $(".connect").click(async () => {
     const giiker = await connect();
     const cube = new Cube(giiker)
     render_scramble(cube);
+
     giiker.on('move', (move) => {
         on_move(cube, move);
     });
@@ -267,6 +280,7 @@ $(".connect").click(async () => {
     // Expose giiker object for testing on console
     window.giiker = giiker;
     window.cube = cube;
+    load_json(autosave);
 });
 $(".reset").click(function (){
     cube.giiker.resetState();
@@ -295,7 +309,7 @@ $(".close_modal").click(function (){
     close_modal()
 });
 $("#file").change(function () {
-    get_json_by_file($("#file").prop("files")[0]).then((response) => load_json(response));
+    get_json_by_file($("#file").prop("files")[0]).then((response) => load_json(JSON.parse(response)));
 })
 $("#download").click(function () {
     download("solves.json", get_json_solves())
