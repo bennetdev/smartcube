@@ -215,8 +215,13 @@ var Stopwatch = function (){
     this.time = get_time;
 }
 async function get_url(url){
-    const response = await fetch("partials/" + url);
+    const response = await fetch("rsc/partials/" + url);
     return await response.text();
+}
+async function load_page(url){
+    await get_url(url).then(function (response) {
+        $(".container").html(response);
+    })
 }
 function get_today(){
     var today = new Date();
@@ -272,7 +277,7 @@ async function get_json_by_file(file){
     return result.json();
 }
 
-async function save_to_session(cube){
+async function save_to_session(){
     var formdata = new FormData();
     formdata.append("solves", get_json_solves())
     await fetch("rsc/partials/session.php", {
@@ -347,7 +352,7 @@ function on_move(cube, move){
         cube.current_solve = new Solve(get_today(), cube.next_id);
         cube.generate_scramble();
         render_scramble(cube);
-        save_to_session(cube).then(console.log("saved"));
+        save_to_session().then(console.log("saved"));
     }
     else{
         cube.current_solve.moves.push(move.notation);
@@ -383,7 +388,7 @@ $(".connect").click(async () => {
 $(".reset").click(function (){
     cube.giiker.resetState();
 })
-$("#history").on("click", ".solve",function (){
+$(".container").on("click" , ".solve",function (){
     $("#solve_modal").css("display", "block");
     var id = parseInt($(this).attr("id"));
     current_solve_id = id;
@@ -427,4 +432,16 @@ $("#file").change(function () {
 })
 $("#download").click(function () {
     download("solves.json", get_json_solves())
+})
+$(".stat_page").click(function (e){
+    e.preventDefault();
+    load_page("stats.php").then();
+})
+$(".timer_page").click(function (e) {
+    e.preventDefault();
+    load_page("timer.php").then(function () {
+        update_stats(cube);
+        update_avg(cube);
+        refresh_solves(cube);
+    });
 })

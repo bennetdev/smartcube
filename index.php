@@ -53,6 +53,7 @@
     <span class="material-icons md-48 connect">bluetooth</span>
     <p id="scramble"></p>
     <div class="float_right">
+        <a href="rsc/partials/timer.php" class="material-icons md-48 timer_page">history</a>
         <a href="rsc/partials/stats.php" class="material-icons md-48 stat_page">leaderboard</a>
         <span class="material-icons md-48 reset">restart_alt</span>
     </div>
