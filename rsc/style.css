@@ -134,4 +134,11 @@ body {
   margin-top: 58px;
 }
 
+.graphs {
+  display: flex;
+}
+.graphs .graph {
+  width: 50%;
+}
+
 /*# sourceMappingURL=style.css.map */
