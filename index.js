@@ -1,4 +1,4 @@
-import {connect} from '../smartcube/js/libs/index.js';
+import {connect} from './js/libs/index.js';
 
 class Solve{
     constructor(date, id) {
@@ -7,12 +7,40 @@ class Solve{
         this.scramble = [];
         this.time = 0;
         this.date = date;
+        this.cross_solved_stage = {
+            index: -1,
+            time: -1
+        };
+        this.f2l_solved_stage = {
+            index: -1,
+            time: -1
+        };
+        this.oll_solved_stage = {
+            index: -1,
+            time: -1
+        };
+        this.pll_solved_stage = {
+            index: -1,
+            time: -1
+        }
     }
     get move_number(){
         return this.moves.length;
     }
     get moves_per_second(){
         return Math.round(this.move_number / round_to_3(this.time) * 100) / 100
+    }
+    get cross_moves(){
+        return this.moves.slice(0, this.cross_solved_stage.index + 1);
+    }
+    get f2l_moves(){
+        return this.moves.slice(this.cross_solved_stage.index + 1, this.f2l_solved_stage.index + 1);
+    }
+    get oll_moves(){
+        return this.moves.slice(this.f2l_solved_stage.index + 1, this.oll_solved_stage.index + 1);
+    }
+    get pll_moves(){
+        return this.moves.slice(this.oll_solved_stage.index + 1, this.pll_solved_stage.index + 1);
     }
 }
 
@@ -26,7 +54,19 @@ class Cube {
         this.scramble = [];
         this.current_solve = new Solve(get_today(), 0);
         this.generate_scramble();
+    }
 
+    get oll_solved(){
+        return this.giiker.stateString.slice(27,36) === "DDDDDDDDD";
+    }
+
+    get cross_solved() {
+        return this.giiker.stateString[1] === "U" && this.giiker.stateString[3] === "U" && this.giiker.stateString[5] === "U" && this.giiker.stateString[7] === "U";
+    }
+
+    get f2l_solved(){
+        var f2l_string = this.giiker.stateString.slice(0, 15) + this.giiker.stateString.slice(18, 24) + this.giiker.stateString.slice(36, 42) + this.giiker.stateString.slice(45, 51);
+        return f2l_string === "UUUUUUUUURRRRRRFFFFFFLLLLLLBBBBBB";
     }
 
     get solved() {
@@ -174,6 +214,10 @@ var Stopwatch = function (){
     this.stop = stop_timer;
     this.time = get_time;
 }
+async function get_url(url){
+    const response = await fetch("partials/" + url);
+    return await response.text();
+}
 function get_today(){
     var today = new Date();
     return today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate();
@@ -243,6 +287,10 @@ function load_json(json){
         solve.moves = solves[i].moves;
         solve.time = solves[i].time;
         solve.scramble = solves[i].scramble;
+        solve.cross_solved_stage = solves[i].cross_solved_stage;
+        solve.f2l_solved_stage = solves[i].f2l_solved_stage;
+        solve.oll_solved_stage = solves[i].oll_solved_stage;
+        solve.pll_solved_stage = solves[i].pll_solved_stage;
         cube.solves.push(solve);
     }
     refresh_solves(cube);
@@ -267,7 +315,6 @@ var current_solve_id = -1;
 
 function on_move(cube, move){
     console.log(stopwatch.get_running());
-    console.log(cube.solved);
     if(!stopwatch.get_running()){
         if(cube.scramble_index === cube.scramble.length){
             if(stopwatch.time() !== 0){
@@ -290,6 +337,9 @@ function on_move(cube, move){
     }
     else if(cube.solved){
         stopwatch.stop();
+        cube.current_solve.moves.push(move.notation);
+        cube.current_solve.pll_solved_stage.index = cube.current_solve.move_number - 1;
+        cube.current_solve.pll_solved_stage.time = stopwatch.time();
         cube.current_solve.id = cube.next_id;
         add_solve(cube.current_solve, cube);
         update_avg(cube);
@@ -301,6 +351,18 @@ function on_move(cube, move){
     }
     else{
         cube.current_solve.moves.push(move.notation);
+        if(cube.current_solve.cross_solved_stage.index === -1 && cube.cross_solved){
+            cube.current_solve.cross_solved_stage.index = cube.current_solve.move_number - 1;
+            cube.current_solve.cross_solved_stage.time = stopwatch.time();
+        }
+        if(cube.current_solve.f2l_solved_stage.index === -1 && cube.f2l_solved){
+            cube.current_solve.f2l_solved_stage.index = cube.current_solve.move_number - 1;
+            cube.current_solve.f2l_solved_stage.time = stopwatch.time();
+        }
+        if(cube.current_solve.oll_solved_stage.index === -1 && cube.oll_solved){
+            cube.current_solve.oll_solved_stage.index = cube.current_solve.move_number - 1;
+            cube.current_solve.oll_solved_stage.time = stopwatch.time();
+        }
     }
 }
 $(".connect").click(async () => {
@@ -331,7 +393,17 @@ $("#history").on("click", ".solve",function (){
     $("#solve_time").html(round_to_3(solve.time));
     $("#solve_moves_number").html(solve.move_number + " moves, " + solve.moves_per_second + " moves per second");
     $("#solve_date").html(solve.date);
-    $("#solve_moves").html(solve.moves.join(" "));
+    if(solve.cross_solved_stage.index === -1){
+        $("#solve_moves").html("<p>" + solve.moves.join(" ") + "</p>");
+    }
+    else{
+        $("#solve_moves").html(
+            "<h4>Cross: " + round_to_3(solve.cross_solved_stage.time) +"s</h4><br>" + solve.cross_moves.join(" ") + "<hr/>" +
+            "<h4>F2L: " + round_to_3(solve.f2l_solved_stage.time) +"s</h4><br>" + solve.f2l_moves.join(" ") + "<hr/>" +
+            "<h4>OLL: " + round_to_3(solve.oll_solved_stage.time) +"s</h4><br>" + solve.oll_moves.join(" ") + "<hr/>" +
+            "<h4>PLL: " + round_to_3(solve.pll_solved_stage.time) +"s</h4><br>" + solve.pll_moves.join(" ") + "<hr/>"
+        );
+    }
     $("#solve_scramble").html(solve.scramble.join(" "));
 });
 $(".delete_solve").click(function (){

@@ -42,10 +42,14 @@ body {
   position: absolute;
   left: 0;
 }
-#appbar .reset {
-  cursor: pointer;
+#appbar .float_right {
   position: absolute;
   right: 0;
+}
+#appbar .float_right .material-icons {
+  text-decoration: none;
+  color: white;
+  cursor: pointer;
 }
 
 #scramble {
@@ -81,10 +85,15 @@ body {
 
 .modalContent {
   background-color: #fefefe;
-  margin: 15% auto;
+  margin: 10% auto;
   padding: 20px;
   border: 1px solid #888;
-  width: 20%;
+  width: 30%;
+}
+
+#solve_moves h4 {
+  margin-bottom: 2px;
+  margin-top: 5px;
 }
 
 .close_modal, .delete_solve, .copy_scramble {

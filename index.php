@@ -44,7 +44,7 @@
         </div>
         <h1 id="solve_time">00.00</h1>
         <p id="solve_moves_number">0</p>
-        <p id="solve_moves"></p>
+        <div id="solve_moves"></div>
         <p id="solve_scramble"></p>
         <p id="solve_date"></p>
     </div>
@@ -52,30 +52,13 @@
 <div id="appbar">
     <span class="material-icons md-48 connect">bluetooth</span>
     <p id="scramble"></p>
-    <span class="material-icons md-48 reset">restart_alt</span>
+    <div class="float_right">
+        <a href="rsc/partials/stats.php" class="material-icons md-48 stat_page">leaderboard</a>
+        <span class="material-icons md-48 reset">restart_alt</span>
+    </div>
 </div>
 <div class="container">
-    <p id="timer">00.00</p>
-    <p id="avg">Avg 00.00 AO3 00.00 AO5 00.00</p>
-    <p id="stats">Top: 00.00 MpS: 0</p>
-    <div id="history_wrapper">
-        <table id="history">
-            <tr>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Scramble</th>
-            </tr>
-        </table>
-    </div>
-    <div class="floating-action-button">
-        <div>
-            <span class="material-icons md-3" id="download">download</span>
-        </div>
-        <div>
-            <label for="file" class="material-icons md-3" id="upload">upload</label>
-            <input type="file" name="file" id="file">
-        </div>
-    </div>
+    <?php include "rsc/partials/timer.php" ?>
 </div>
 </body>
 </html>
